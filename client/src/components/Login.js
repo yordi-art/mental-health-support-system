@@ -2,110 +2,44 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    userType: 'client'
-  });
+  const [formData, setFormData] = useState({ email: '', password: '', userType: 'client' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const { email, password, userType } = formData;
+  const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const onChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const onSubmit = async e => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    
-    // Demo login - in production, this would call an API
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find(u => u.email === email);
-    
-    if (!user) {
-      setError('User not found. Please register first.');
-      return;
-    }
-    
-    if (user.userType !== userType) {
-      setError(`Invalid user type. This account is registered as ${user.userType}.`);
-      return;
-    }
-    
+    const user = users.find(u => u.email === formData.email);
+    if (!user) return setError('User not found');
+    if (user.userType !== formData.userType) return setError(`Invalid user type`);
     localStorage.setItem('user', JSON.stringify(user));
-    
-    // Navigate based on user type
-    switch(user.userType) {
-      case 'client':
-        navigate('/client-dashboard');
-        break;
-      case 'therapist':
-        navigate('/therapist-dashboard');
-        break;
-      case 'counselor':
-        navigate('/counselor-dashboard');
-        break;
-      case 'admin':
-        navigate('/admin-dashboard');
-        break;
-      default:
-        navigate('/');
-    }
+    navigate(`/${user.userType}-dashboard`);
   };
 
   return (
-    <div className="form-container">
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Welcome Back</h2>
-      <p style={{ textAlign: 'center', marginBottom: '30px', color: '#666' }}>
-        Mental Health Support System
-      </p>
-      
-      {error && <div style={{ background: '#fee', color: '#c33', padding: '10px', borderRadius: '8px', marginBottom: '20px', textAlign: 'center' }}>{error}</div>}
-      
+    <div style={{ maxWidth: '400px', margin: '50px auto', background: 'white', padding: '30px', borderRadius: '12px' }}>
+      <h2 style={{ textAlign: 'center' }}>Welcome Back</h2>
+      {error && <div style={{ background: '#fee', color: '#c33', padding: '10px', borderRadius: '8px', margin: '10px 0' }}>{error}</div>}
       <form onSubmit={onSubmit}>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={email}
-            onChange={onChange}
-            required
-            placeholder="Enter your email"
-          />
+        <div style={{ marginBottom: '15px' }}>
+          <input type="email" name="email" placeholder="Email" onChange={onChange} required style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
         </div>
-        
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={onChange}
-            required
-            placeholder="Enter your password"
-          />
+        <div style={{ marginBottom: '15px' }}>
+          <input type="password" name="password" placeholder="Password" onChange={onChange} required style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }} />
         </div>
-        
-        <div className="form-group">
-          <label>User Type</label>
-          <select name="userType" value={userType} onChange={onChange}>
-            <option value="client">Client - Seeking Support</option>
-            <option value="therapist">Therapist - Licensed Therapist</option>
-            <option value="counselor">Counselor - Mental Health Counselor</option>
-            <option value="admin">Admin - System Administrator</option>
+        <div style={{ marginBottom: '20px' }}>
+          <select name="userType" onChange={onChange} style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
+            <option value="client">Client</option>
+            <option value="therapist">Therapist</option>
+            <option value="counselor">Counselor</option>
+            <option value="admin">Admin</option>
           </select>
         </div>
-        
-        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-          Login
-        </button>
+        <button type="submit" style={{ width: '100%', padding: '12px', background: '#4a90e2', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Login</button>
       </form>
-      
-      <p style={{ textAlign: 'center', marginTop: '20px' }}>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
+      <p style={{ textAlign: 'center', marginTop: '20px' }}><Link to="/register">Register here</Link></p>
     </div>
   );
 };
